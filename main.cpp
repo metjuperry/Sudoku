@@ -1,9 +1,35 @@
 #include "Table.h"
 #include "vectorHelper.h"
 
+void write_text_to_log_file(const std::string &text) {
+    std::ofstream log_file(
+            "log_text.txt", std::ios_base::out | std::ios_base::app);
+    log_file << text << std::endl;
+    log_file.close();
+}
+
+void clear_text_in_log_file() {
+    std::ofstream ofs;
+    ofs.open("log_text.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.close();
+}
+
+void read_text() {
+    std::string line;
+    std::ifstream myfile("log_text.txt");
+    if (myfile.is_open()) {
+        while (std::getline(myfile, line)) {
+            std::cout << line << '\n';
+        }
+        myfile.close();
+    } else std::cout << "Unable to open file";
+
+}
+
 void generateSudoku(Table Tables[]) {
     vectorHelper Vector(Tables);
     bool itsDone = false;
+    clear_text_in_log_file();
 
     std::vector<int> OriginalList = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     Vector.saveList(OriginalList);
@@ -12,7 +38,8 @@ void generateSudoku(Table Tables[]) {
 
     while (!itsDone) {
         counter++;
-        std::cout << counter << ": Working on " << Vector.getRow() << " " << Vector.getCol() << std::endl;
+        write_text_to_log_file(std::to_string(counter) + ": Working on " + std::to_string(
+                static_cast<int>(Vector.getRow())) + " " + std::to_string(static_cast<int>(Vector.getCol())) + "\n");
 
         std::pair<int, int> WorkedOnCoords = Vector.GetFieldCoordsByCoords(Vector.getRow(), Vector.getCol());
         Field *WorkedOn = &Tables[WorkedOnCoords.first].getFields()[WorkedOnCoords.second];
@@ -23,35 +50,41 @@ void generateSudoku(Table Tables[]) {
             //Move back one square
             Vector.MoveBackward();
             WorkedOn->setNum(0);
-            std::cout << counter << ": All possibilities empty. Refreshing and moving to " << Vector.getRow() << " "
-                      << Vector.getCol() << std::endl;
+            write_text_to_log_file(std::to_string(counter) + ": All possibilities empty. Refreshing and moving to " +
+                                   std::to_string(static_cast<int>(Vector.getRow())) + " "
+                                   + std::to_string(static_cast<int>(Vector.getCol())) + "\n");
         } else {
             int TryNumber = vectorHelper::pickRandomfromList(WorkedOn->getPossibilities());
-            std::cout << counter << ": Trying " << TryNumber << std::endl;
+            write_text_to_log_file(std::to_string(counter) + ": Trying " + std::to_string(TryNumber) + "\n");
             if (!Vector.IsValidNumber(Vector.getRow(),
                                       Vector.getCol(),
                                       TryNumber)) {
                 WorkedOn->eraseFromPossibilities(TryNumber);
-                std::cout << counter << ": Not possible, removing " << TryNumber << " from possibilities" << std::endl;
-                std::cout << counter << ": Remaining: ";
+                write_text_to_log_file(
+                        std::to_string(counter) + ": Not possible, removing " + std::to_string(TryNumber) +
+                        " from possibilities" + "\n");;
+                write_text_to_log_file(std::to_string(counter) + ": Remaining: ");
 
                 for (auto number:WorkedOn->getPossibilities()) {
-                    std::cout << number;
+                    write_text_to_log_file(std::to_string(number));
                 }
-                std::cout << std::endl;
+                write_text_to_log_file("\n");
 
             } else {
                 WorkedOn->setNum(TryNumber);
 
-                std::cout << counter << ": " << TryNumber << " works, writing " << std::endl;
+                write_text_to_log_file(
+                        std::to_string(counter) + ": " + std::to_string(TryNumber) + " works, writing " + "\n");
 
                 // Move forward one square
                 Vector.MoveForward();
-                std::cout << counter << ": Moving on to " << Vector.getRow() << " " << Vector.getCol() << std::endl;
+                write_text_to_log_file(std::to_string(counter) + ": Moving on to " +
+                                       std::to_string(static_cast<int>(Vector.getRow())) + " " +
+                                       std::to_string(static_cast<int>(Vector.getCol())) + "\n");
             }
         }
         if (Vector.getRow() == 10.0f && Vector.getCol() == 1.0f) {
-            std::cout << counter << ": Final field" << std::endl;
+            write_text_to_log_file(std::to_string(counter) + ": Final field " + "\n");
             itsDone = true;
         }
     }
