@@ -6,22 +6,35 @@
 class Field {
 public:
     Field();
+
     void switchVisible();
+
     virtual void show(sf::RenderWindow &window);
 
     void setRect(double x, double y, int w);
+
     void setNum(int num);
+
     int getNum() const;
 
     bool collision(sf::Vector2i mouseCoords);
+
+    const std::vector<int> &getPossibilities() const;
+
+    void setPossibilities(const std::vector<int> &Possibilities);
+
+    void eraseFromPossibilities(int possibility);
+
 private:
-    int _x,_y,_w;
+    int _x, _y, _w;
     bool shown;
     int _num;
 
     sf::Font SanFran;
     sf::Text number;
     sf::RectangleShape field;
+
+    std::vector<int> Possibilities;
 };
 
 

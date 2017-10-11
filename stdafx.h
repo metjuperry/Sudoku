@@ -16,8 +16,10 @@
 #include <SFML/Audio.hpp>
 
 #include <map>
-#include <iostream>
 #include <cassert>
+#include <iostream>
+#include <fstream>
 #include <sstream>
 #include <cstdlib>
 #include <random>
+

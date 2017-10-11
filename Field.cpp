@@ -2,6 +2,8 @@
 
 Field::Field() {
     shown = true;
+    _num = 0;
+    Possibilities = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 }
 
 void Field::switchVisible() {
@@ -10,7 +12,7 @@ void Field::switchVisible() {
 
 void Field::show(sf::RenderWindow &window) {
     window.draw(field);
-    if(shown){
+    if (shown) {
         window.draw(number);
     }
 }
@@ -33,20 +35,34 @@ void Field::setRect(double x, double y, int w) {
     _y = static_cast<int>(y);
     _w = w;
 
-    field.setSize(sf::Vector2f(w,w));
+    field.setSize(sf::Vector2f(w, w));
     field.setOutlineColor(sf::Color::Black);
     field.setOutlineThickness(2);
     field.setPosition(x, y);
 
-    number.setPosition(x + w/3, y + w/8);
+    number.setPosition(x + w / 3, y + w / 8);
 }
 
 
 bool Field::collision(sf::Vector2i mouseCoords) {
-    sf::IntRect collisionArea(_x,_y,_w,_w);
+    sf::IntRect collisionArea(_x, _y, _w, _w);
     return collisionArea.contains(mouseCoords);
 }
 
 int Field::getNum() const {
     return _num;
+}
+
+const std::vector<int> &Field::getPossibilities() const {
+    return Possibilities;
+}
+
+void Field::eraseFromPossibilities(int possibility) {
+    Possibilities.erase(std::remove(Possibilities.begin(),
+                                    Possibilities.end(),
+                                    possibility), Possibilities.end());
+}
+
+void Field::setPossibilities(const std::vector<int> &Possibilities) {
+    Field::Possibilities = Possibilities;
 }

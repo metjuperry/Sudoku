@@ -3,51 +3,56 @@
 
 void generateSudoku(Table Tables[]) {
     vectorHelper Vector(Tables);
-    int itsDone = 0;
+    bool itsDone = false;
 
-    std::vector<int> Possibilities = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    Vector.saveList(Possibilities);
-    float tableCol = 1.0f;
-    float tableRow = 1.0f;
+    std::vector<int> OriginalList = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    Vector.saveList(OriginalList);
+    int counter = 0;
+    Vector.setFieldCoordinates(1.0f, 1.0f);
 
-    while (itsDone != 9) {
-        if (Possibilities.empty()) {
-            Possibilities = Vector.RefreshList();
+    while (!itsDone) {
+        counter++;
+        std::cout << counter << ": Working on " << Vector.getRow() << " " << Vector.getCol() << std::endl;
 
-            if (tableCol == 1.0f) {
-                tableCol = 9.0f;
-                tableRow--;
-            } else {
-                tableCol--;
-            }
+        std::pair<int, int> WorkedOnCoords = Vector.GetFieldCoordsByCoords(Vector.getRow(), Vector.getCol());
+        Field *WorkedOn = &Tables[WorkedOnCoords.first].getFields()[WorkedOnCoords.second];
+
+        if (WorkedOn->getPossibilities().empty()) {
+            WorkedOn->setPossibilities(Vector.RefreshList());
+
+            //Move back one square
+            Vector.MoveBackward();
+            WorkedOn->setNum(0);
+            std::cout << counter << ": All possibilities empty. Refreshing and moving to " << Vector.getRow() << " "
+                      << Vector.getCol() << std::endl;
         } else {
-            int TryNumber = vectorHelper::pickRandomfromList(Possibilities);
-            if (!Vector.IsValidNumber(tableRow,
-                                      tableCol,
-                                      Vector.GetFieldByCoords(tableRow, tableCol).first,
+            int TryNumber = vectorHelper::pickRandomfromList(WorkedOn->getPossibilities());
+            std::cout << counter << ": Trying " << TryNumber << std::endl;
+            if (!Vector.IsValidNumber(Vector.getRow(),
+                                      Vector.getCol(),
                                       TryNumber)) {
-                Possibilities.erase(std::remove(Possibilities.begin(),
-                                                Possibilities.end(),
-                                                TryNumber), Possibilities.end());
-            } else {
-                std::pair<int, int> TableCoords = Vector.GetFieldByCoords(tableRow,tableCol);
-                Tables[TableCoords.first].getFields()[TableCoords.second].setNum(TryNumber);
+                WorkedOn->eraseFromPossibilities(TryNumber);
+                std::cout << counter << ": Not possible, removing " << TryNumber << " from possibilities" << std::endl;
+                std::cout << counter << ": Remaining: ";
 
-                if(tableCol == 9.0f){
-                    tableCol = 1.0f;
-                    tableRow++;
-                } else {
-                    tableCol++;
+                for (auto number:WorkedOn->getPossibilities()) {
+                    std::cout << number;
                 }
+                std::cout << std::endl;
+
+            } else {
+                WorkedOn->setNum(TryNumber);
+
+                std::cout << counter << ": " << TryNumber << " works, writing " << std::endl;
+
+                // Move forward one square
+                Vector.MoveForward();
+                std::cout << counter << ": Moving on to " << Vector.getRow() << " " << Vector.getCol() << std::endl;
             }
         }
-        for (int DoneHelper = 0; DoneHelper != 9; DoneHelper++){
-            if(Tables[DoneHelper].AllFieldsFilled()){
-                itsDone++;
-            }
-        }
-        if (itsDone < 9){
-            itsDone = 0;
+        if (Vector.getRow() == 10.0f && Vector.getCol() == 1.0f) {
+            std::cout << counter << ": Final field" << std::endl;
+            itsDone = true;
         }
     }
 }
@@ -120,7 +125,7 @@ int main() {
         window.clear(sf::Color::White);
         for (auto table: Tables) {
             table.draw(window);
-            table.checkFieldsCollision(mouseCoordinates);
+            //table.checkFieldsCollision(mouseCoordinates);
         }
         window.display();
     }

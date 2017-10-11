@@ -8,18 +8,23 @@
 class Table {
 public:
     Table();
+
     void setRect(double x, double y);
+
     virtual void draw(sf::RenderWindow &window);
 
     Field *getFields();
 
     void setFields(double _x, double _y);
+
     void checkFieldsCollision(sf::Vector2i mousecoords);
 
     bool AllFieldsFilled();
 
     std::vector<int> GetRowCoords(int row);
+
     std::vector<int> GetColCoords(int col);
+
 private:
     int w = 150;
     Field fields[9];

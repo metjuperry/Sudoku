@@ -2,7 +2,7 @@
 
 #include <utility>
 
-vectorHelper::vectorHelper(Table * tables){
+vectorHelper::vectorHelper(Table *tables) {
     _tables = tables;
 }
 
@@ -14,7 +14,7 @@ int vectorHelper::pickRandomfromList(std::vector<int> list) {
 std::vector<int> vectorHelper::RemoveSame(std::vector<int> a, std::vector<int> b) {
     std::vector<int> difference;
 
-    if (a.size() == b.size()){
+    if (a.size() == b.size()) {
         return a;
     } else {
 
@@ -44,16 +44,27 @@ std::vector<int> vectorHelper::GetCommon(std::vector<int> a, std::vector<int> b)
     return Common;
 }
 
-std::pair<int, int> vectorHelper::GetFieldByCoords(float row, float col) {
-    std::vector<std::pair<int, int>> Result;
-
+std::pair<int, int> vectorHelper::GetFieldCoordsByCoords(float row, float col) {
     std::vector<std::pair<int, int>> Row = GetWholeRow(row);
     std::vector<std::pair<int, int>> Col = GetWholeCol(col);
 
-    for(auto RowField : Row){
-        for(auto ColField : Col){
-            if (RowField == ColField){
+    for (auto RowField : Row) {
+        for (auto ColField : Col) {
+            if (RowField == ColField) {
                 return RowField;
+            }
+        }
+    }
+}
+
+Field vectorHelper::GetFieldByCoords(float row, float col) {
+    std::vector<std::pair<int, int>> Row = GetWholeRow(row);
+    std::vector<std::pair<int, int>> Col = GetWholeCol(col);
+
+    for (auto RowField : Row) {
+        for (auto ColField : Col) {
+            if (RowField == ColField) {
+                return _tables[RowField.first].getFields()[RowField.second];
             }
         }
     }
@@ -74,9 +85,9 @@ std::vector<std::pair<int, int>> vectorHelper::GetWholeRow(float row) {
         finish = 9;
     }
 
-    if(row > 6.0f) {
+    if (row > 6.0f) {
         row -= 6.0f;
-    } else if (row > 3.0f){
+    } else if (row > 3.0f) {
         row -= 3.0f;
     }
 
@@ -95,25 +106,25 @@ std::vector<std::pair<int, int>> vectorHelper::GetWholeCol(float col) {
     int columnTables[] = {0, 3, 6};
 
     if (col / 3 > 1 && col / 3 <= 2) {
-        for(int i = 0; i != 3; i++){
+        for (int i = 0; i != 3; i++) {
             columnTables[i] = columnTables[i] + 1;
         }
-    } else if (col/3 > 2) {
-        for(int i = 0; i != 3; i++){
+    } else if (col / 3 > 2) {
+        for (int i = 0; i != 3; i++) {
             columnTables[i] = columnTables[i] + 2;
         }
     }
 
-    if(col > 6.0f){
+    if (col > 6.0f) {
         col -= 6.0f;
-    } else if(col > 3.0f){
+    } else if (col > 3.0f) {
         col -= 3.0f;
     }
 
-    for(int tableReference:columnTables){
+    for (int tableReference:columnTables) {
         std::vector<int> ColInCoords = _tables[tableReference].GetColCoords(static_cast<int>(col));
-        for(auto field:ColInCoords){
-            ColCoords.emplace_back(std::make_pair(tableReference,field));
+        for (auto field:ColInCoords) {
+            ColCoords.emplace_back(std::make_pair(tableReference, field));
         }
     }
 
@@ -123,7 +134,7 @@ std::vector<std::pair<int, int>> vectorHelper::GetWholeCol(float col) {
 std::vector<int> vectorHelper::GetRowNumbers(float row) {
     std::vector<int> RowPossibilities;
 
-    for (auto field : GetWholeRow(row)){
+    for (auto field : GetWholeRow(row)) {
         RowPossibilities.emplace_back(_tables[field.first].getFields()[field.second].getNum());
     }
 
@@ -133,7 +144,7 @@ std::vector<int> vectorHelper::GetRowNumbers(float row) {
 std::vector<int> vectorHelper::GetColNumbers(float col) {
     std::vector<int> ColPossibilities;
 
-    for(auto field : GetWholeCol(col)){
+    for (auto field : GetWholeCol(col)) {
         ColPossibilities.emplace_back(_tables[field.first].getFields()[field.second].getNum());
     }
 
@@ -161,7 +172,7 @@ std::vector<int> vectorHelper::GetPossibleNumbersInTable(int table) {
 
     std::vector<int> NumbersInTable;
 
-    for (int field = 0; field != 9; field++){
+    for (int field = 0; field != 9; field++) {
         NumbersInTable.emplace_back(_tables[table].getFields()[field].getNum());
     }
 
@@ -173,15 +184,17 @@ int vectorHelper::GetValidNumber(float row, float col, int table) {
     std::vector<int> NumberInCol = GetPossibleNumbersInCol(col);
     std::vector<int> NumberInTable = GetPossibleNumbersInTable(table);
 
-    return pickRandomfromList(GetCommon(GetCommon(NumberInRow,NumberInCol),NumberInTable));
+    return pickRandomfromList(GetCommon(GetCommon(NumberInRow, NumberInCol), NumberInTable));
 }
 
-bool vectorHelper::IsValidNumber(float row, float col, int table, int number) {
+bool vectorHelper::IsValidNumber(float row, float col, int number) {
+    int table = GetFieldCoordsByCoords(row, col).first;
+
     std::vector<int> NumberInRow = GetPossibleNumbersInRow(row);
     std::vector<int> NumberInCol = GetPossibleNumbersInCol(col);
     std::vector<int> NumberInTable = GetPossibleNumbersInTable(table);
 
-    std::vector<int> AllPossible = GetCommon(GetCommon(NumberInRow,NumberInCol),NumberInTable);
+    std::vector<int> AllPossible = GetCommon(GetCommon(NumberInRow, NumberInCol), NumberInTable);
 
     return std::find(AllPossible.begin(), AllPossible.end(), number) != AllPossible.end();
 }
@@ -194,4 +207,36 @@ std::vector<int> vectorHelper::RefreshList() {
     return OriginalList;
 }
 
+const std::pair<int, int> &vectorHelper::getBothFieldCoordinates() const {
+    return fieldCoordinates;
+}
 
+const float &vectorHelper::getRow() const {
+    return fieldCoordinates.first;
+}
+
+const float &vectorHelper::getCol() const {
+    return fieldCoordinates.second;
+}
+
+void vectorHelper::setFieldCoordinates(float row, float col) {
+    vectorHelper::fieldCoordinates = {row, col};
+}
+
+void vectorHelper::MoveForward() {
+    if (getCol() == 9.0f) {
+        fieldCoordinates.first++;
+        fieldCoordinates.second = 1.0f;
+    } else {
+        fieldCoordinates.second++;
+    }
+}
+
+void vectorHelper::MoveBackward() {
+    if (getCol() == 1.0f) {
+        fieldCoordinates.first--;
+        fieldCoordinates.second = 9.0f;
+    } else {
+        fieldCoordinates.second--;
+    }
+}
