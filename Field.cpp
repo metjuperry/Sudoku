@@ -14,6 +14,9 @@ void Field::show(sf::RenderWindow &window) {
     window.draw(field);
     if (shown) {
         window.draw(number);
+    } else {
+        number.setFillColor(sf::Color::Red);
+        window.draw(number);
     }
 }
 

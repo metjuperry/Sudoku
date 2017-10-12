@@ -90,6 +90,30 @@ void generateSudoku(Table Tables[]) {
     }
 }
 
+void hideNumbers(Table Tables[]) {
+    int numOfHidden = 57;
+    std::vector<std::pair<int, int>> CoordsOfFields;
+    write_text_to_log_file("Starting the hiding process");
+
+    for (int tables = 0; tables != 9; tables++) {
+        for (int field = 0; field != 9; field++) {
+            CoordsOfFields.emplace_back(std::make_pair(tables, field));
+        }
+    }
+
+    for (int range = 0; range != numOfHidden; range++) {
+        int randomPair = rand() % CoordsOfFields.size();
+        std::pair<int, int> FieldToBeVisible = CoordsOfFields[randomPair];
+        write_text_to_log_file("Hiding number at coords " + std::to_string(FieldToBeVisible.first) + " " +
+                               std::to_string(FieldToBeVisible.second));
+
+        Tables[FieldToBeVisible.first].getFields()[FieldToBeVisible.second].switchVisible();
+
+        CoordsOfFields.erase(std::remove(CoordsOfFields.begin(),
+                                         CoordsOfFields.end(),
+                                         FieldToBeVisible), CoordsOfFields.end());
+    }
+}
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Sudoku");
@@ -143,24 +167,60 @@ int main() {
     }
     **/
 
-    generateSudoku(Tables);
+    enum GameState {
+        Generating, Playing
+    };
+    GameState CurrentGameState = Generating;
+
+    sf::Font SanFran;
+    sf::Text CurrentAction;
+
+    SanFran.loadFromFile("San Francisco.ttf");
+
+    CurrentAction.setFont(SanFran);
+    CurrentAction.setFillColor(sf::Color::Black);
+    CurrentAction.setPosition(window.getSize().x / 1.5,
+                              window.getSize().y / 1.2);
+    CurrentAction.setCharacterSize(45);
+    CurrentAction.setString("Generating...");
+
 
     while (window.isOpen()) {
-
         sf::Vector2i mouseCoordinates = (sf::Mouse::getPosition(window));
+        switch (CurrentGameState) {
+            case Generating: {
+                sf::Event MenuEvent;
+                while (window.pollEvent(MenuEvent)) {
+                    if (MenuEvent.type == sf::Event::Closed)
+                        window.close();
+                }
 
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+                window.clear(sf::Color::White);
+                window.draw(CurrentAction);
+                window.display();
 
-        window.clear(sf::Color::White);
-        for (auto table: Tables) {
-            table.draw(window);
-            //table.checkFieldsCollision(mouseCoordinates);
+                generateSudoku(Tables);
+                hideNumbers(Tables);
+
+                CurrentGameState = Playing;
+                break;
+            }
+            case Playing: {
+                sf::Event PlayingEvent;
+                while (window.pollEvent(PlayingEvent)) {
+                    if (PlayingEvent.type == sf::Event::Closed)
+                        window.close();
+                }
+
+                window.clear(sf::Color::White);
+                for (auto table: Tables) {
+                    table.draw(window);
+                    //table.checkFieldsCollision(mouseCoordinates);
+                }
+                window.display();
+                break;
+            }
         }
-        window.display();
     }
 
     return 0;
