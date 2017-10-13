@@ -78,8 +78,8 @@ void generateSudoku(Table Tables[]) {
     }
 }
 
-void hideNumbers(Table Tables[]) {
-    int numOfHidden = 57;
+void hideNumbers(int ammount, Table Tables[]) {
+    int numOfHidden = 81 - ammount;
     std::vector<std::pair<int, int>> CoordsOfFields;
     write_text_to_log_file("Starting the hiding process");
 
@@ -193,7 +193,7 @@ int main() {
                 generateSudoku(Tables);
                 generatedIn = Timer.getElapsedTime();
 
-                hideNumbers(Tables);
+                hideNumbers(24, Tables);
 
                 CurrentGameState = Transition;
                 break;
@@ -222,7 +222,7 @@ int main() {
                         for (int table = 0; table != 9; table++) {
                             for (int field = 0; field != 9; field++) {
                                 if (Tables[table].getFields()[field].collision(mouseCoordinates)) {
-                                    Tables[table].getFields()[field].setNum(2);
+                                    Tables[table].getFields()[field].switchVisible();
                                 }
                             }
                         }

@@ -14,10 +14,11 @@ void Field::show(sf::RenderWindow &window) {
     window.draw(field);
     if (shown) {
         window.draw(number);
-    } else {
-        number.setFillColor(sf::Color(0, 0, 0, 100));
-        window.draw(number);
     }
+//    else {
+//        number.setFillColor(sf::Color(0, 0, 0, 100));
+//        window.draw(number);
+//    }
 }
 
 void Field::setNum(int num) {
