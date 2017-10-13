@@ -15,7 +15,7 @@ void Field::show(sf::RenderWindow &window) {
     if (shown) {
         window.draw(number);
     } else {
-        number.setFillColor(sf::Color::Red);
+        number.setFillColor(sf::Color(0, 0, 0, 100));
         window.draw(number);
     }
 }
@@ -68,4 +68,8 @@ void Field::eraseFromPossibilities(int possibility) {
 
 void Field::setPossibilities(const std::vector<int> &Possibilities) {
     Field::Possibilities = Possibilities;
+}
+
+bool Field::isShown() const {
+    return shown;
 }

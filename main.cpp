@@ -14,18 +14,6 @@ void clear_text_in_log_file() {
     ofs.close();
 }
 
-void read_text() {
-    std::string line;
-    std::ifstream myfile("log_text.txt");
-    if (myfile.is_open()) {
-        while (std::getline(myfile, line)) {
-            std::cout << line << '\n';
-        }
-        myfile.close();
-    } else std::cout << "Unable to open file";
-
-}
-
 void generateSudoku(Table Tables[]) {
     vectorHelper Vector(Tables);
     bool itsDone = false;
@@ -121,6 +109,7 @@ int main() {
 
     Table Tables[9];
     vectorHelper Vector(Tables);
+    sf::Uint8 opacity = 255;
 
     int num = 0;
     double x = window.getSize().x / 2 - 1.5 * 150;
@@ -168,17 +157,18 @@ int main() {
     **/
 
     enum GameState {
-        Generating, Playing
+        Generating, Transition, Playing
     };
     GameState CurrentGameState = Generating;
 
     sf::Font SanFran;
     sf::Text CurrentAction;
+    sf::Time generatedIn;
 
     SanFran.loadFromFile("San Francisco.ttf");
 
     CurrentAction.setFont(SanFran);
-    CurrentAction.setFillColor(sf::Color::Black);
+    CurrentAction.setFillColor(sf::Color(0, 0, 0, opacity));
     CurrentAction.setPosition(window.getSize().x / 1.5,
                               window.getSize().y / 1.2);
     CurrentAction.setCharacterSize(45);
@@ -199,23 +189,49 @@ int main() {
                 window.draw(CurrentAction);
                 window.display();
 
+                sf::Clock Timer;
                 generateSudoku(Tables);
+                generatedIn = Timer.getElapsedTime();
+
                 hideNumbers(Tables);
 
-                CurrentGameState = Playing;
+                CurrentGameState = Transition;
                 break;
             }
+            case Transition: {
+                window.clear(sf::Color::White);
+                CurrentAction.setString("Generated. \n" + std::to_string(generatedIn.asSeconds()) + " sec");
+                CurrentAction.setFillColor(sf::Color(0, 0, 0, opacity));
+                opacity = opacity - sf::Uint8(1);
+
+                if (opacity < 10) {
+                    CurrentGameState = Playing;
+                }
+                window.draw(CurrentAction);
+                window.display();
+                break;
+            }
+
             case Playing: {
                 sf::Event PlayingEvent;
                 while (window.pollEvent(PlayingEvent)) {
                     if (PlayingEvent.type == sf::Event::Closed)
                         window.close();
+                    else if (PlayingEvent.type == sf::Event::EventType::MouseButtonPressed &&
+                             sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                        for (int table = 0; table != 9; table++) {
+                            for (int field = 0; field != 9; field++) {
+                                if (Tables[table].getFields()[field].collision(mouseCoordinates)) {
+                                    Tables[table].getFields()[field].setNum(2);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 window.clear(sf::Color::White);
                 for (auto table: Tables) {
                     table.draw(window);
-                    //table.checkFieldsCollision(mouseCoordinates);
                 }
                 window.display();
                 break;

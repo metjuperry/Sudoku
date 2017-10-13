@@ -35,15 +35,6 @@ void Table::setFields(double _x, double _y) {
     }
 }
 
-void Table::checkFieldsCollision(sf::Vector2i mousecoords) {
-    for (auto collisionRectangle:fields) {
-        if (collisionRectangle.collision(mousecoords)) {
-            //TODO: It recognises collision, but doesn't do the function?
-            collisionRectangle.setNum(2);
-        }
-    }
-}
-
 Field *Table::getFields() {
     return fields;
 }
@@ -96,14 +87,5 @@ std::vector<int> Table::GetColCoords(int col) {
             break;
     }
     return ColCoordsArray;
-}
-
-bool Table::AllFieldsFilled() {
-    for (const auto &field: fields) {
-        if (field.getNum() == 0) {
-            return false;
-        }
-    }
-    return true;
 }
 

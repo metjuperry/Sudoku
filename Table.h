@@ -17,10 +17,6 @@ public:
 
     void setFields(double _x, double _y);
 
-    void checkFieldsCollision(sf::Vector2i mousecoords);
-
-    bool AllFieldsFilled();
-
     std::vector<int> GetRowCoords(int row);
 
     std::vector<int> GetColCoords(int col);

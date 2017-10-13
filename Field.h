@@ -9,6 +9,8 @@ public:
 
     void switchVisible();
 
+    bool isShown() const;
+
     virtual void show(sf::RenderWindow &window);
 
     void setRect(double x, double y, int w);
