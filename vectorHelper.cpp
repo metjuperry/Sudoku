@@ -240,3 +240,15 @@ void vectorHelper::MoveBackward() {
         fieldCoordinates.second--;
     }
 }
+
+float vectorHelper::GetVectorMagnitude(sf::Vector2f Vector) {
+    return sqrt(Vector.x * Vector.x + Vector.y * Vector.y);
+}
+
+sf::Vector2f vectorHelper::Normalize(sf::Vector2f Vector) {
+    return Vector / GetVectorMagnitude(Vector);
+}
+
+float vectorHelper::getFullCircleAngle(double angle) {
+    return angle > 0 ? angle : 180.0f + (180.0f + angle);
+}

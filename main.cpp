@@ -1,5 +1,6 @@
 #include "Table.h"
 #include "vectorHelper.h"
+#include "circularPicker.h"
 
 void write_text_to_log_file(const std::string &text) {
     std::ofstream log_file(
@@ -81,7 +82,7 @@ void generateSudoku(Table Tables[]) {
 void hideNumbers(int ammount, Table Tables[]) {
     int numOfHidden = 81 - ammount;
     std::vector<std::pair<int, int>> CoordsOfFields;
-    write_text_to_log_file("Starting the hiding process");
+    write_text_to_log_file("Starting the hiding process (" + std::to_string(ammount) + ")");
 
     for (int tables = 0; tables != 9; tables++) {
         for (int field = 0; field != 9; field++) {
@@ -90,7 +91,7 @@ void hideNumbers(int ammount, Table Tables[]) {
     }
 
     for (int range = 0; range != numOfHidden; range++) {
-        int randomPair = rand() % CoordsOfFields.size();
+        int randomPair = static_cast<int>(rand() % CoordsOfFields.size());
         std::pair<int, int> FieldToBeVisible = CoordsOfFields[randomPair];
         write_text_to_log_file("Hiding number at coords " + std::to_string(FieldToBeVisible.first) + " " +
                                std::to_string(FieldToBeVisible.second));
@@ -125,37 +126,6 @@ int main() {
         y += 150;
     }
 
-    /**
-    Code to set a row/col in one big table to a certain number
-    std::vector<int> coords = Tables[0].GetRowCoords(1);
-    for(auto coord: coords){
-        Tables[0].getFields()[coord].setNum(1);
-    }
-
-    for (int f = 1; f != 10; f++) {
-        //Code to set a whole row in the sudoku to a number
-        std::vector<std::pair<int, int>> PairsOfCoordsRow = Vector.GetWholeRow(f);
-        for (auto field:PairsOfCoordsRow) {
-            Tables[field.first].getFields()[field.second].setNum(1);
-        }
-    }
-
-    std::vector<std::pair<int, int>> PairOfCoordsCol = Vector.GetWholeCol(5.0f);
-    for(auto field:PairOfCoordsCol){
-        Tables[field.first].getFields()[field.second].setNum(1);
-    }
-
-    int tableCol = 1;
-    for (int tableRow = 1; tableRow != 10; tableRow++){
-        std::vector<std::pair<int, int>> PairsOfCoordsRow = Vector.GetWholeRow(tableRow);
-        for (auto field:PairsOfCoordsRow) {
-            Tables[field.first].getFields()[field.second].setNum(Vector.GetValidNumber(tableRow, tableCol, field.first));
-            tableCol++;
-        }
-        tableCol = 1;
-    }
-    **/
-
     enum GameState {
         Generating, Transition, Playing
     };
@@ -164,6 +134,9 @@ int main() {
     sf::Font SanFran;
     sf::Text CurrentAction;
     sf::Time generatedIn;
+
+    circularPicker Ring;
+    sf::Vector2f ClickedPoint;
 
     SanFran.loadFromFile("San Francisco.ttf");
 
@@ -174,7 +147,6 @@ int main() {
     CurrentAction.setCharacterSize(45);
     CurrentAction.setString("Generating...");
 
-
     while (window.isOpen()) {
         sf::Vector2i mouseCoordinates = (sf::Mouse::getPosition(window));
         switch (CurrentGameState) {
@@ -184,6 +156,13 @@ int main() {
                     if (MenuEvent.type == sf::Event::Closed)
                         window.close();
                 }
+
+//                sf::Vector2f OffsetVector(CenterRing.getPosition().x - mouseCoordinates.x,
+//                                          CenterRing.getPosition().y - mouseCoordinates.y);
+//
+//                if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+//                    std::cout << Ring.getNumberOnRadial(OffsetVector) << std::endl;
+//                }
 
                 window.clear(sf::Color::White);
                 window.draw(CurrentAction);
@@ -218,7 +197,7 @@ int main() {
                     if (PlayingEvent.type == sf::Event::Closed)
                         window.close();
                     else if (PlayingEvent.type == sf::Event::EventType::MouseButtonPressed &&
-                             sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                             sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
                         for (int table = 0; table != 9; table++) {
                             for (int field = 0; field != 9; field++) {
                                 if (Tables[table].getFields()[field].collision(mouseCoordinates)) {
@@ -226,6 +205,29 @@ int main() {
                                 }
                             }
                         }
+                    } else if (PlayingEvent.type == sf::Event::EventType::MouseButtonPressed &&
+                               sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                        ClickedPoint.x = mouseCoordinates.x;
+                        ClickedPoint.y = mouseCoordinates.y;
+
+                        Ring.setPosition(mouseCoordinates);
+                        Ring.switchVisible();
+                    } else if (PlayingEvent.type == sf::Event::EventType::MouseButtonReleased &&
+                               PlayingEvent.mouseButton.button == sf::Mouse::Left) {
+                        sf::Vector2f OffsetVector(ClickedPoint.x - mouseCoordinates.x,
+                                                  ClickedPoint.y - mouseCoordinates.y);
+
+                        for (int table = 0; table != 9; table++) {
+                            for (int field = 0; field != 9; field++) {
+                                if (Tables[table].getFields()[field].collision(sf::Vector2i(
+                                        static_cast<int>(ClickedPoint.x), static_cast<int>(ClickedPoint.y)))) {
+                                    Tables[table].getFields()[field].setNum(Ring.getNumberOnRadial(OffsetVector));
+                                    Tables[table].getFields()[field].switchVisible();
+                                }
+                            }
+                        }
+
+                        Ring.switchVisible();
                     }
                 }
 
@@ -233,6 +235,7 @@ int main() {
                 for (auto table: Tables) {
                     table.draw(window);
                 }
+                Ring.show(window);
                 window.display();
                 break;
             }

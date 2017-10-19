@@ -9,8 +9,14 @@ public:
 
     static int pickRandomfromList(std::vector<int> list);
 
+    static float getFullCircleAngle(double angle);
+
     static std::vector<int> RemoveSame(std::vector<int> a, std::vector<int> b);
     static std::vector<int> GetCommon(std::vector<int> a, std::vector<int> b);
+
+    static float GetVectorMagnitude(sf::Vector2f Vector);
+
+    static sf::Vector2f Normalize(sf::Vector2f Vector);
 
     std::pair<int, int> GetFieldCoordsByCoords(float row, float col);
 
