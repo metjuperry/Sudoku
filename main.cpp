@@ -133,6 +133,24 @@ int main() {
 
     sf::Font SanFran;
     sf::Text CurrentAction;
+
+    std::vector<std::pair<int, int>> offsets;
+    offsets.emplace_back(std::make_pair(30, 75)); // 1
+    offsets.emplace_back(std::make_pair(-15, 75)); // 2
+    offsets.emplace_back(std::make_pair(-45, 50)); // 3
+    offsets.emplace_back(std::make_pair(-50, 10)); // 4
+    offsets.emplace_back(std::make_pair(-30, -20)); // 5
+    offsets.emplace_back(std::make_pair(10, -40)); // 6
+    offsets.emplace_back(std::make_pair(45, -25)); // 7
+    offsets.emplace_back(std::make_pair(65, 10)); // 8
+    offsets.emplace_back(std::make_pair(60, 50)); // 9
+
+    std::vector<sf::Text> Numbers;
+    for (int pickNumbers = 0; pickNumbers != 9; pickNumbers++) {
+        Numbers.emplace_back(sf::Text(std::to_string(pickNumbers + 1), SanFran));
+        Numbers[pickNumbers].setFillColor(sf::Color::Black);
+    }
+
     sf::Time generatedIn;
 
     circularPicker Ring;
@@ -142,8 +160,8 @@ int main() {
 
     CurrentAction.setFont(SanFran);
     CurrentAction.setFillColor(sf::Color(0, 0, 0, opacity));
-    CurrentAction.setPosition(window.getSize().x / 1.5,
-                              window.getSize().y / 1.2);
+    CurrentAction.setPosition(static_cast<float>(window.getSize().x / 1.5),
+                              static_cast<float>(window.getSize().y / 1.2));
     CurrentAction.setCharacterSize(45);
     CurrentAction.setString("Generating...");
 
@@ -157,13 +175,6 @@ int main() {
                         window.close();
                 }
 
-//                sf::Vector2f OffsetVector(CenterRing.getPosition().x - mouseCoordinates.x,
-//                                          CenterRing.getPosition().y - mouseCoordinates.y);
-//
-//                if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-//                    std::cout << Ring.getNumberOnRadial(OffsetVector) << std::endl;
-//                }
-
                 window.clear(sf::Color::White);
                 window.draw(CurrentAction);
                 window.display();
@@ -172,7 +183,7 @@ int main() {
                 generateSudoku(Tables);
                 generatedIn = Timer.getElapsedTime();
 
-                hideNumbers(24, Tables);
+                hideNumbers(40, Tables);
 
                 CurrentGameState = Transition;
                 break;
@@ -201,7 +212,7 @@ int main() {
                         for (int table = 0; table != 9; table++) {
                             for (int field = 0; field != 9; field++) {
                                 if (Tables[table].getFields()[field].collision(mouseCoordinates)) {
-                                    Tables[table].getFields()[field].switchVisible();
+                                    Tables[table].getFields()[field].validateGuessed();
                                 }
                             }
                         }
@@ -209,6 +220,11 @@ int main() {
                                sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                         ClickedPoint.x = mouseCoordinates.x;
                         ClickedPoint.y = mouseCoordinates.y;
+
+                        for (int dialNumber = 0; dialNumber != Numbers.size(); dialNumber++) {
+                            Numbers[dialNumber].setPosition(ClickedPoint.x - offsets[dialNumber].first,
+                                                            ClickedPoint.y - offsets[dialNumber].second);
+                        }
 
                         Ring.setPosition(mouseCoordinates);
                         Ring.switchVisible();
@@ -221,8 +237,10 @@ int main() {
                             for (int field = 0; field != 9; field++) {
                                 if (Tables[table].getFields()[field].collision(sf::Vector2i(
                                         static_cast<int>(ClickedPoint.x), static_cast<int>(ClickedPoint.y)))) {
-                                    Tables[table].getFields()[field].setNum(Ring.getNumberOnRadial(OffsetVector));
-                                    Tables[table].getFields()[field].switchVisible();
+                                    Tables[table].getFields()[field].set_guessNum(Ring.getNumberOnRadial(OffsetVector));
+                                    if (!Tables[table].getFields()[field].isGuessed()) {
+                                        Tables[table].getFields()[field].switchGuessed();
+                                    }
                                 }
                             }
                         }
@@ -236,6 +254,11 @@ int main() {
                     table.draw(window);
                 }
                 Ring.show(window);
+                if (Ring.is_visible()) {
+                    for (const auto &dialNumber: Numbers) {
+                        window.draw(dialNumber);
+                    }
+                }
                 window.display();
                 break;
             }

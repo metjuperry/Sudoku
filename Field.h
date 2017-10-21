@@ -9,7 +9,11 @@ public:
 
     void switchVisible();
 
+    void switchGuessed();
+
     bool isShown() const;
+
+    bool isGuessed() const;
 
     virtual void show(sf::RenderWindow &window);
 
@@ -27,13 +31,19 @@ public:
 
     void eraseFromPossibilities(int possibility);
 
+    void set_guessNum(int guessNum);
+
+    bool checkCorrect();
+
+    void validateGuessed();
+
 private:
     int _x, _y, _w;
-    bool shown;
-    int _num;
+    bool shown, guessed;
+    int _num, _guessNum;
 
     sf::Font SanFran;
-    sf::Text number;
+    sf::Text number, Guessnumber;
     sf::RectangleShape field;
 
     std::vector<int> Possibilities;

@@ -8,7 +8,7 @@ circularPicker::circularPicker() {
 
     _OuterCircle.setRadius(radius);
     _OuterCircle.setPointCount(9);
-    _OuterCircle.setFillColor(sf::Color::Transparent);
+    _OuterCircle.setFillColor(sf::Color::White);
     _OuterCircle.setOutlineThickness(2);
     _OuterCircle.setOutlineColor(sf::Color::Black);
 
@@ -71,4 +71,8 @@ int circularPicker::getNumberOnRadial(sf::Vector2f numbers) {
         }
     }
     return 8;
+}
+
+bool circularPicker::is_visible() const {
+    return _visible;
 }

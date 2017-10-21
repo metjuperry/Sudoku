@@ -17,6 +17,8 @@ public:
 
     void switchVisible();
 
+    bool is_visible() const;
+
 private:
     float radius;
     float _mouseXOuter, _mouseYOuter, _mouseXInner, _mouseYInner;
